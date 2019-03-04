@@ -1,0 +1,35 @@
+{% extends 'home/common/base.html' %}
+{% block title %}
+博客详情
+{% endblock %}
+{% block pagecontent %}
+<h2>{{ posts.title }}</h2>
+<hr style="border:3px double #987cb9;" width="100%" color=#987cb9 size=3>
+{{ posts.article|safe }}
+<br>
+<span style="float: right">
+    <p onclick="dofavorite({{ posts.id }})" style="cursor: pointer;">{% if current_user.is_authenticated %}{% if current_user.is_favorite(posts.id) %}取消收藏{% else %}收藏{% endif %}{% else %}收藏{% endif %}</p>
+    <p>作者：<span style="font-size: 20px;font-weight: bold">{{ posts.user.username }}</span></p>
+    <p>发表于：{{ moment(posts.timestamp).format('YYYY-MM-DD H:m:s') }}</p>
+</span>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        function dofavorite(pid) {
+            node = $('p:first-child');
+            html = node.html();
+            $.get({{ url_for('hposts.do_favorite') }},{'pid':pid},function (data,status) {
+                if(data.res == 200)
+                    if(html == '收藏'){
+                        node.html('取消收藏');
+                    }else{
+                       node.html('收藏');
+                    }
+                else if(window.confirm("还没有登录？是否前去登录")){
+                        window.location.href = '{{ url_for('huser.login',_external=True) }}'
+                }
+            });
+        }
+    </script>
+{% endblock %}
